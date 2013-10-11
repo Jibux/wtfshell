@@ -1,0 +1,10 @@
+# Object files
+*.o
+*.ko
+
+# Libraries
+*.lib
+*.a
+
+# Temp files
+*~
