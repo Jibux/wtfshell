@@ -1,10 +1,26 @@
 #include "common.h"
 
-int main() {
+int main(int argc, char* argv[]) {
 
-	int ch, i;
+	int ch, i, fd;
+
 	struct termios term;
-	struct termios term2;
+	struct winsize win;
+	// forkpty(master, name, &term, &win);
+	
+	pid_t pid = forkpty(&fd, NULL, &term, NULL);
+	if (pid == -1) {
+		perror("forkpty");
+		return 1;
+	} else if (pid == 0) {
+		if (execlp("/bin/sh", "sh", (void*)0) == -1) {
+			perror("execlp");
+		}
+		fprintf(stderr, "program exited.\n");
+		return 1;
+	}
+	printf("Child process: %d\n", pid);
+	printf("master fd: %d\n", fd);
 
 	tcgetattr( STDIN_FILENO, &term );
 
@@ -41,7 +57,27 @@ int main() {
 		printf("%d\n", ch); 
 	}*/
 
+
+
 	
+	/*const char* cmd = "ls -l /\n";
+	if (write(fd, cmd, strlen(cmd)) == -1) {
+		perror("write");
+		return 1;
+	}
+
+	char buf[255];
+	int nread;
+	while ((nread = read(fd, buf, 254)) > 0) {
+		int i;
+		for (i = 0; i < nread; i++) {
+			putchar(buf[i]);
+		}
+	}
+	printf("Done\n");*/
+
+
+
 
 	return 0;
 }

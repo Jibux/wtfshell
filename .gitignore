@@ -10,11 +10,12 @@
 *~
 
 # Crap
+*.log
 Makefile
 config.h
-config.log
 config.status
 src/.deps
 src/wtfshell
 stamp-h1
 autom4te.cache
+configure.scan

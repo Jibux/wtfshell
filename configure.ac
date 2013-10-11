@@ -7,13 +7,15 @@ AM_INIT_AUTOMAKE([-Wall -Werror foreign])
 AC_CONFIG_SRCDIR([src/functions.h])
 AC_CONFIG_HEADERS([config.h])
 
+CFLAGS="-Wall -g -lutil"
+
 # Checks for programs.
 AC_PROG_CC
 
 # Checks for libraries.
 
 # Checks for header files.
-AC_CHECK_HEADERS([stdlib.h])
+AC_CHECK_HEADERS([stdlib.h util.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
 
