@@ -8,3 +8,12 @@
 
 # Temp files
 *~
+
+# Crap
+Makefile
+config.h
+config.log
+config.status
+src/.deps
+src/wtfshell
+stamp-h1
