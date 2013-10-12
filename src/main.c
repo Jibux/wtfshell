@@ -1,8 +1,14 @@
 #include "functions.h"
 
+
+// TODO
+// Chained list for buffer?
+// What can we do with the WTF global variables?
+
 int main(int argc, char* argv[]) {
 
-	int ch, i;
+	int ch;
+	char cha;
 
 
 	if(init_shell() == RET_ERROR) {
@@ -32,26 +38,29 @@ int main(int argc, char* argv[]) {
 	//for (i = 0; i < 4; i++) {
 	while (1) {
 		//puts("enter arrow");
-		ch = getchar() & 0xFF;
+		cha = getchar();
+		ch = cha & 0xFF;
+		
+		print_char = 1;
 
 		if(arrow1 == 1 && ch == 91) {
 			ch += getchar() & 0xFF;
 			ch += 27;
-			print_char = 1;
+			print_char = 0;
+			if(ch == 185) {
+				printf("\033[1C");
+			} else if(ch == 186) {
+				printf("\033[1D");
+			}
 		}
 		arrow1 = 0;
 		if(ch == 27) {
 			arrow1 = 1;
-		} else {
-			print_char = 1;
+			print_char = 0;
 		}
 
-
 		if(print_char == 1) {
-			printf("%d", ch); 
-			printf("\b");
-			printf("\'");
-			print_char = 0;
+			printf("%c", cha); 
 		}
 		
 		/*printf("%d\n", ch); 

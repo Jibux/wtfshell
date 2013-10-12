@@ -42,6 +42,8 @@ int quit_shell() {
 	term.c_lflag = backupflag;
 	tcsetattr( STDIN_FILENO, TCSANOW, &term );
 
+	// Free buffer!
+
 	return RET_OK;
 }
 
