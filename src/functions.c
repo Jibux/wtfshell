@@ -23,8 +23,8 @@ int init_shell() {
 	}
 
 	tcgetattr( STDIN_FILENO, &term );
-	// Backup the flag to reset it properly when exiting the program.
-	backupflag = term.c_lflag;
+
+	backupflag = term.c_lflag;	// Backup the flag to reset it properly when exiting the program.
 
 	/*
 	 * Get rid off canonical mode and echo mode (~ICANON and ~ECHO)
@@ -34,6 +34,8 @@ int init_shell() {
 	term.c_lflag &= ~( ICANON | ECHO );
 	tcsetattr( STDIN_FILENO, TCSANOW, &term );
 
+	buffer = NULL;
+
 	return RET_OK;
 }
 
@@ -42,7 +44,29 @@ int quit_shell() {
 	term.c_lflag = backupflag;
 	tcsetattr( STDIN_FILENO, TCSANOW, &term );
 
-	// Free buffer!
+	printf("\n");
+	print_buffer(buffer);
+	printf("\n");
+
+	free_list(buffer);
+
+	return RET_OK;
+}
+
+int print_buffer(List *buffer_to_print) {
+	List *tmp_buffer;
+	
+	// Do IT DIFFERENTLY WITH GENERIC FORWARD AND BACKWARD ANS KEEP TRACKINg OF CURSOR POS
+	printf("\033[s");
+
+	while(buffer_to_print != NULL) {
+		tmp_buffer = buffer_to_print->next;
+		printf("%c", buffer_to_print->value.character);
+		buffer_to_print = tmp_buffer;
+	}
+
+	printf("\033[u");
+	printf("\033[1C");
 
 	return RET_OK;
 }
