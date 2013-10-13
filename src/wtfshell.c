@@ -1,4 +1,4 @@
-#include "functions.h"
+#include "wtfshell.h"
 
 void print_error(char *string) {
 	fprintf(stderr, "%s\n", string);	
@@ -67,6 +67,56 @@ int print_buffer(List *buffer_to_print) {
 
 	printf("\033[u");
 	printf("\033[1C");
+
+	return RET_OK;
+}
+
+Value get_char() {
+	Value value;
+	value.character = getchar();
+	value.integer = value.character & 0xFF;
+
+	return value;
+}
+
+int run_shell() {
+	List *tmp_buffer = NULL;
+	Value tmp_value;
+	int ascii_code;
+	int offset = 0;
+	bool escape_pressed = false;
+
+	for (;;) {
+		tmp_value = get_char();
+		ascii_code = tmp_value.integer + offset;
+		offset = 0;
+
+		if(escape_pressed && ascii_code == OPEN_S_B) {
+			offset = ESC + OPEN_S_B;
+		} else if(ascii_code >= BEGIN_NORMAL && ascii_code <= END_NORMAL) {
+			tmp_buffer = push_elem(tmp_buffer, tmp_value);
+			if(tmp_buffer->next == NULL && tmp_buffer->prev == NULL) {
+				buffer = tmp_buffer;	// We keep the head.
+			}
+			print_buffer(tmp_buffer);
+		} else if(ascii_code == RIGHT_A_K) { // RIGHT			// CALL FUNCTION!!! KEEP TRACK OF CURSOR POS
+			if(tmp_buffer != NULL && tmp_buffer->next != NULL) {
+				printf("\033[1C");
+				tmp_buffer = tmp_buffer->next;
+			}
+		} else if(ascii_code == LEFT_A_K) { // LEFT
+			if(tmp_buffer != NULL && tmp_buffer->prev != NULL) {
+				printf("\033[1D");
+				tmp_buffer = tmp_buffer->prev;
+			}
+		}
+		
+		escape_pressed = false;
+
+		if(ascii_code == ESC) {
+			escape_pressed = true;
+		}
+	}
 
 	return RET_OK;
 }

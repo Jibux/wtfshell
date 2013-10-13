@@ -7,6 +7,7 @@
 #include <pty.h>  /* for openpty and forkpty */ 
 #include <utmp.h> /* for login_tty */
 #include <signal.h>
+#include <stdbool.h>
 
 
 // DEFINE SOME CONSTANTS
