@@ -79,6 +79,9 @@ Value get_char() {
 	return value;
 }
 
+// GO LEFT
+// GO RIGHT
+
 int run_shell() {
 	List *tmp_buffer = NULL;
 	Value tmp_value;
@@ -91,30 +94,38 @@ int run_shell() {
 		ascii_code = tmp_value.integer + offset;
 		offset = 0;
 
-		if(escape_pressed && ascii_code == OPEN_S_B) {
-			offset = ESC + OPEN_S_B;
-		} else if(ascii_code >= BEGIN_NORMAL && ascii_code <= END_NORMAL) {
+		if(ascii_code >= BEGIN_NORMAL && ascii_code <= END_NORMAL) {
+			if(escape_pressed && ascii_code == OPEN_S_B) {
+				offset = ESC + OPEN_S_B;
+			} else {
 			tmp_buffer = push_elem(tmp_buffer, tmp_value);
-			if(tmp_buffer->next == NULL && tmp_buffer->prev == NULL) {
-				buffer = tmp_buffer;	// We keep the head.
+				if(tmp_buffer->next == NULL && tmp_buffer->prev == NULL) {
+					buffer = tmp_buffer;	// We keep the head.
+				}
+				print_buffer(tmp_buffer);
 			}
-			print_buffer(tmp_buffer);
-		} else if(ascii_code == RIGHT_A_K) { // RIGHT			// CALL FUNCTION!!! KEEP TRACK OF CURSOR POS
-			if(tmp_buffer != NULL && tmp_buffer->next != NULL) {
-				printf("\033[1C");
-				tmp_buffer = tmp_buffer->next;
-			}
-		} else if(ascii_code == LEFT_A_K) { // LEFT
-			if(tmp_buffer != NULL && tmp_buffer->prev != NULL) {
-				printf("\033[1D");
-				tmp_buffer = tmp_buffer->prev;
-			}
+		} else {
+			switch(ascii_code) {
+				case RIGHT_A_K: // RIGHT			// CALL FUNCTION!!! KEEP TRACK OF CURSOR POS
+					if(tmp_buffer != NULL && tmp_buffer->next != NULL) {
+						printf("\033[1C");
+						tmp_buffer = tmp_buffer->next;
+					}
+					break;
+				case LEFT_A_K:// LEFT
+					if(tmp_buffer != NULL && tmp_buffer->prev != NULL) {
+						printf("\033[1D");
+						tmp_buffer = tmp_buffer->prev;
+					}
+					break;
+				default: break;
+			} 
 		}
 		
-		escape_pressed = false;
-
 		if(ascii_code == ESC) {
 			escape_pressed = true;
+		} else {
+			escape_pressed = false;
 		}
 	}
 
