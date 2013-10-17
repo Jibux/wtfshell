@@ -8,6 +8,7 @@
 #include <utmp.h> /* for login_tty */
 #include <signal.h>
 #include <stdbool.h>
+#include <stdarg.h>
 
 
 // DEFINE SOME CONSTANTS

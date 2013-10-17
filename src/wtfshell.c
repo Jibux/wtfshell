@@ -1,7 +1,11 @@
 #include "wtfshell.h"
 
-void print_error(char *string) {
-	fprintf(stderr, "%s\n", string);	
+void print_error(const char *string, ...) {
+	va_list argptr;
+	va_start(argptr, string);
+	vfprintf(stderr, string, argptr);
+	va_end(argptr);
+	fprintf(stderr, "\n");	
 }
 
 void sig_handler(int signal) {
@@ -48,7 +52,14 @@ int quit_shell() {
 	print_buffer(buffer);
 	printf("\n");
 
+	free_buffer();
+
+	return RET_OK;
+}
+
+int free_buffer() {
 	free_list(buffer);
+	buffer = NULL;
 
 	return RET_OK;
 }
@@ -56,7 +67,7 @@ int quit_shell() {
 int print_buffer(List *buffer_to_print) {
 	List *tmp_buffer;
 	
-	// Do IT DIFFERENTLY WITH GENERIC FORWARD AND BACKWARD ANS KEEP TRACKINg OF CURSOR POS
+	// Do IT DIFFERENTLY WITH GENERIC FORWARD AND BACKWARD ANS KEEP TRACKING OF CURSOR POS
 	printf("\033[s");
 
 	while(buffer_to_print != NULL) {
@@ -100,7 +111,7 @@ int move_cusor(List **tmp_buffer, const short direction) {
 int run_shell() {
 	List *tmp_buffer = NULL;
 	Value tmp_value;
-	int ascii_code;
+	int ascii_code = -1;
 	int offset = 0;
 	bool escape_pressed = false;
 
@@ -111,7 +122,7 @@ int run_shell() {
 
 		if(ascii_code >= BEGIN_NORMAL && ascii_code <= END_NORMAL) {
 			if(escape_pressed && ascii_code == OPEN_S_B) {
-				offset = ESC + OPEN_S_B;
+				offset = ESC + OPEN_S_B; // COMBINATION OF SEVERAL CHARS
 			} else {
 				tmp_buffer = push_elem(tmp_buffer, tmp_value);
 				if(tmp_buffer->next == NULL && tmp_buffer->prev == NULL) {
@@ -127,6 +138,12 @@ int run_shell() {
 				case LEFT_A_K:
 					move_cusor(&tmp_buffer, CURSOR_DIR_LEFT);
 					break;
+				case ENTER:
+					if(handle_cmd() == RET_ERROR) {
+						print_error("Error while executing command!");
+					}
+					tmp_buffer = NULL;
+					break;
 				default: break;
 			} 
 		}
@@ -136,7 +153,22 @@ int run_shell() {
 		} else {
 			escape_pressed = false;
 		}
+
+		ascii_code = -1;
 	}
+
+	return RET_OK;
+}
+
+int handle_cmd() {
+	printf("\n");
+	printf("CMD: ");
+	print_buffer(buffer);
+	printf("\n");
+
+	free_buffer();
+
+	execute_cmd();
 
 	return RET_OK;
 }

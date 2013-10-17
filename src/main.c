@@ -7,20 +7,6 @@
 
 int main(int argc, char* argv[]) {
 
-	if(init_shell() == RET_ERROR) {
-		print_error("Cannot init!");
-		return RET_ERROR;
-	}
-
-	if(run_shell() == RET_ERROR) {
-		print_error("Cannot run shell!");
-		return RET_ERROR;
-	}
-	
-	if(quit_shell() == RET_ERROR) {
-		print_error("Error while exiting shell.");
-	}
-
 	//int fd;
 	//struct winsize win;
 	// forkpty(master, name, &term, &win);
@@ -55,7 +41,22 @@ int main(int argc, char* argv[]) {
 	}
 	printf("Done\n");*/
 
-	return 0;
+	if(init_shell() == RET_ERROR) {
+		print_error("Cannot init!");
+		return RET_ERROR;
+	}
+
+	if(run_shell() == RET_ERROR) {
+		print_error("Cannot run shell!");
+		return RET_ERROR;
+	}
+	
+	if(quit_shell() == RET_ERROR) {
+		print_error("Error while exiting shell.");
+	}
+
+
+	return RET_OK;
 }
 
 /*
