@@ -79,8 +79,23 @@ Value get_char() {
 	return value;
 }
 
-// GO LEFT
-// GO RIGHT
+int move_cusor(List **tmp_buffer, const short direction) {
+	if(direction == CURSOR_DIR_LEFT) {
+		if(*tmp_buffer != NULL && (*tmp_buffer)->prev != NULL) {
+			printf("\033[1D");
+			*tmp_buffer = (*tmp_buffer)->prev;
+		}
+		return RET_OK;
+	} else if(direction == CURSOR_DIR_RIGHT) {
+		if(*tmp_buffer != NULL && (*tmp_buffer)->next != NULL) {
+			printf("\033[1C");
+			*tmp_buffer = (*tmp_buffer)->next;
+		}
+		return RET_OK;
+	}
+	
+	return RET_ERROR;
+}
 
 int run_shell() {
 	List *tmp_buffer = NULL;
@@ -98,7 +113,7 @@ int run_shell() {
 			if(escape_pressed && ascii_code == OPEN_S_B) {
 				offset = ESC + OPEN_S_B;
 			} else {
-			tmp_buffer = push_elem(tmp_buffer, tmp_value);
+				tmp_buffer = push_elem(tmp_buffer, tmp_value);
 				if(tmp_buffer->next == NULL && tmp_buffer->prev == NULL) {
 					buffer = tmp_buffer;	// We keep the head.
 				}
@@ -106,17 +121,11 @@ int run_shell() {
 			}
 		} else {
 			switch(ascii_code) {
-				case RIGHT_A_K: // RIGHT			// CALL FUNCTION!!! KEEP TRACK OF CURSOR POS
-					if(tmp_buffer != NULL && tmp_buffer->next != NULL) {
-						printf("\033[1C");
-						tmp_buffer = tmp_buffer->next;
-					}
+				case RIGHT_A_K:
+					move_cusor(&tmp_buffer, CURSOR_DIR_RIGHT);
 					break;
-				case LEFT_A_K:// LEFT
-					if(tmp_buffer != NULL && tmp_buffer->prev != NULL) {
-						printf("\033[1D");
-						tmp_buffer = tmp_buffer->prev;
-					}
+				case LEFT_A_K:
+					move_cusor(&tmp_buffer, CURSOR_DIR_LEFT);
 					break;
 				default: break;
 			} 
