@@ -7,16 +7,30 @@ union Value {
 	char character;
 };
 
+typedef struct ListElem ListElem;
 typedef struct List List;
 
-struct List {
+struct ListElem {
 	Value value;
-	List *prev;
-	List *next;
+	ListElem *prev;
+	ListElem *next;
 };
 
-List* new_elem(Value);
-List* push_elem(List*, Value);
+struct List {
+	ListElem *head;
+	ListElem *current;
+	ListElem *queue;
+	size_t position;
+	size_t size;
+};
 
-int free_list(List *);
+
+void init_list(List *);
+ListElem* new_elem(Value);
+ListElem* push_elem(List *, Value);
+// Backward
+// Forward
+// FreeElem or delete
+
+int free_list(ListElem *);
 

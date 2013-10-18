@@ -12,15 +12,15 @@
 // GLOBAL VARIABLES
 tcflag_t backupflag;
 struct termios term;
-List *buffer;
+ListElem *buffer;
 
 void sig_handler(int);
 int init_shell();
 void quit_shell();
 int free_buffer();
-int print_buffer(List *);
+int print_buffer(ListElem *);
 Value get_char();
-int move_cusor(List **, const short);
+int move_cusor(ListElem **, const short);
 int run_shell();
 int handle_cmd();
 

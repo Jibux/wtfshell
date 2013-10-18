@@ -6,6 +6,8 @@ void sig_handler(int signal) {
 	}
 }
 
+
+
 int init_shell() {
 	if (signal(SIGINT, sig_handler) == SIG_ERR) {
 		fprintf(stderr, "\nCan't catch SIGINT\n");
@@ -51,8 +53,8 @@ int free_buffer() {
 	return RET_OK;
 }
 
-int print_buffer(List *buffer_to_print) {
-	List *tmp_buffer;
+int print_buffer(ListElem *buffer_to_print) {
+	ListElem *tmp_buffer;
 	
 	// Do IT DIFFERENTLY WITH GENERIC FORWARD AND BACKWARD ANS KEEP TRACKING OF CURSOR POS
 	printf("\033[s");
@@ -77,7 +79,7 @@ Value get_char() {
 	return value;
 }
 
-int move_cusor(List **tmp_buffer, const short direction) {
+int move_cusor(ListElem **tmp_buffer, const short direction) {
 
 	switch(direction) {
 		case CURSOR_DIR_LEFT:
@@ -108,7 +110,7 @@ int move_cusor(List **tmp_buffer, const short direction) {
 }
 
 int run_shell() {
-	List *tmp_buffer = NULL;
+	ListElem *tmp_buffer = NULL;
 	Value tmp_value;
 	int ascii_code = -1;
 	int offset = 0;
