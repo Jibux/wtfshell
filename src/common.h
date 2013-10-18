@@ -16,3 +16,6 @@
 #define RET_ERROR 1
 #define RET_OK 0
 
+
+void print_error(const char *, ...);
+

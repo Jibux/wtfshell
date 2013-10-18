@@ -62,8 +62,8 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
-am_wtfshell_OBJECTS = main.$(OBJEXT) list.$(OBJEXT) wtfshell.$(OBJEXT) \
-	command.$(OBJEXT)
+am_wtfshell_OBJECTS = main.$(OBJEXT) common.$(OBJEXT) list.$(OBJEXT) \
+	wtfshell.$(OBJEXT) command.$(OBJEXT)
 wtfshell_OBJECTS = $(am_wtfshell_OBJECTS)
 wtfshell_LDADD = $(LDADD)
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
@@ -170,7 +170,7 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-wtfshell_SOURCES = main.c list.c wtfshell.c command.c
+wtfshell_SOURCES = main.c common.c list.c wtfshell.c command.c
 all: all-am
 
 .SUFFIXES:
@@ -256,6 +256,7 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/command.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/common.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/list.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/main.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/wtfshell.Po@am__quote@

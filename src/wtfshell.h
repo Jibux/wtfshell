@@ -6,16 +6,17 @@
 // CONSTANTS
 #define CURSOR_DIR_LEFT 1
 #define CURSOR_DIR_RIGHT 2
+#define CURSOR_DIR_BEGIN 3
+#define CURSOR_DIR_END 4
 
 // GLOBAL VARIABLES
 tcflag_t backupflag;
 struct termios term;
 List *buffer;
 
-void print_error(const char *, ...);
 void sig_handler(int);
 int init_shell();
-int quit_shell();
+void quit_shell();
 int free_buffer();
 int print_buffer(List *);
 Value get_char();

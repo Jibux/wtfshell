@@ -51,10 +51,7 @@ int main(int argc, char* argv[]) {
 		return RET_ERROR;
 	}
 	
-	if(quit_shell() == RET_ERROR) {
-		print_error("Error while exiting shell.");
-	}
-
+	quit_shell();
 
 	return RET_OK;
 }
