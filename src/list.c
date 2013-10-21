@@ -19,7 +19,7 @@ ListElem* new_elem(Value value) {
 	return new_node;
 }
 
-ListElem* push_elem(List *list, Value value) {
+int push_elem(List *list, Value value) {
 	ListElem *new_node = new_elem(value);
 	ListElem *node = list->current;
 	
@@ -37,7 +37,7 @@ ListElem* push_elem(List *list, Value value) {
 			// First element of the list
 			list->queue = new_node;
 		}
-		return new_node;
+		return RET_OK;
 	}
 
 	if(node->next != NULL) {
@@ -55,21 +55,71 @@ ListElem* push_elem(List *list, Value value) {
 	list->size++;
 	list->position++;
 
-	return new_node;
+	return RET_OK;
 }
 
-int free_list(ListElem *nodes) {
-	if(nodes == NULL) {
+int move_begin_list(List *list) {
+	list->current = list->head;
+	return RET_OK;
+}
+
+int move_end_list(List *list) {
+	list->current = list->queue;
+	return RET_OK;
+}
+
+int backward_list(List *list) {
+	if(list->current == NULL) {
+		list->current = list->head;
 		return RET_OK;
 	}
 
-	ListElem *nodes_to_free = nodes;
-	ListElem *tmp_node;
+	if(list->current->prev != NULL) {
+		list->current = list->current->prev;
+	}
+	
+	return RET_OK;
+}
 
-	while(nodes_to_free != NULL) {
-		tmp_node = nodes_to_free->next;
-		free(nodes_to_free);
-		nodes_to_free = tmp_node;
+int forward_list(List *list) {
+	if(list->current == NULL) {
+		list->current = list->head;
+		return RET_OK;
+	}
+
+	if(list->current->next != NULL) {
+		list->current = list->current->next;
+	}
+	
+	return RET_OK;
+}
+
+int delete_elem(List *list) {
+	if(list->current == NULL) {
+		list->current = list->queue;
+	}
+
+	if(list->current->prev == NULL) {
+		list->head = list->current->next;
+	} else {
+		list->current->prev->next = list->current->next;
+	}
+
+	if(list->current->next == NULL) {
+		list->queue = list->current->prev;
+	} else {
+		list->current->next->prev = list->current->prev;
+	}
+
+	free(list->current);
+	list->current = NULL;
+
+	return RET_OK;
+}
+
+int free_list(List *list) {
+	while(list->queue != NULL) {
+		delete_elem(list);
 	}
 
 	return RET_OK;

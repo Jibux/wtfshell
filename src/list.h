@@ -27,10 +27,11 @@ struct List {
 
 void init_list(List *);
 ListElem* new_elem(Value);
-ListElem* push_elem(List *, Value);
-// Backward
-// Forward
-// FreeElem or delete
-
-int free_list(ListElem *);
+int push_elem(List *, Value);
+int move_begin_list(List *);
+int move_end_list(List *);
+int backward_list(List *);
+int forward_list(List *);
+int delete_elem(List *);
+int free_list(List *);
 

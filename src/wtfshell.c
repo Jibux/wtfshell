@@ -6,8 +6,6 @@ void sig_handler(int signal) {
 	}
 }
 
-
-
 int init_shell() {
 	if (signal(SIGINT, sig_handler) == SIG_ERR) {
 		fprintf(stderr, "\nCan't catch SIGINT\n");
@@ -25,7 +23,7 @@ int init_shell() {
 	term.c_lflag &= ~( ICANON | ECHO );
 	tcsetattr( STDIN_FILENO, TCSANOW, &term );
 
-	buffer = NULL;
+	init_list(buffer);
 
 	return RET_OK;
 }
@@ -48,22 +46,22 @@ void quit_shell() {
 
 int free_buffer() {
 	free_list(buffer);
-	buffer = NULL;
 
 	return RET_OK;
 }
 
-int print_buffer(ListElem *buffer_to_print) {
-	ListElem *tmp_buffer;
-	
-	// Do IT DIFFERENTLY WITH GENERIC FORWARD AND BACKWARD ANS KEEP TRACKING OF CURSOR POS
+int print_buffer() {
+	if(buffer->current == NULL) {
+		return RET_OK;
+	}
+
+	// DO IT DIFFERENTLY WITH GENERIC FORWARD AND BACKWARD ANS KEEP TRACKING OF CURSOR POS
 	printf("\033[s");
 
-	while(buffer_to_print != NULL) {
-		tmp_buffer = buffer_to_print->next;
-		printf("%c", buffer_to_print->value.character);
-		buffer_to_print = tmp_buffer;
-	}
+	do {
+		printf("%c", buffer->current->value.character);
+		forward_list(buffer);
+	} while(buffer->current->next != NULL);
 
 	printf("\033[u");
 	printf("\033[1C");
@@ -79,29 +77,28 @@ Value get_char() {
 	return value;
 }
 
-int move_cusor(ListElem **tmp_buffer, const short direction) {
-
+int move_cusor(const short direction) {
 	switch(direction) {
 		case CURSOR_DIR_LEFT:
-			if(*tmp_buffer != NULL) {
+			if(buffer->current != NULL) {
 				printf("\033[1D");
-				*tmp_buffer = (*tmp_buffer)->prev;
+				backward_list(buffer);
 			}
 			break;
 		case CURSOR_DIR_RIGHT:
-			if(*tmp_buffer != NULL && (*tmp_buffer)->next != NULL) {
+			if(buffer->current != NULL) {
 				printf("\033[1C");
-				*tmp_buffer = (*tmp_buffer)->next;
-			} else if(*tmp_buffer == NULL) {
-				*tmp_buffer = buffer;
-				printf("\033[1C");
+				forward_list(buffer);
 			}
 			break;
 		case CURSOR_DIR_BEGIN:
 			printf("\r");
-			*tmp_buffer = NULL;
+			move_begin_list(buffer);
 			break;
 		case CURSOR_DIR_END:
+			printf("\r");
+			move_begin_list(buffer);
+			print_buffer();
 			break;
 		default: break;
 	}
@@ -110,7 +107,6 @@ int move_cusor(ListElem **tmp_buffer, const short direction) {
 }
 
 int run_shell() {
-	ListElem *tmp_buffer = NULL;
 	Value tmp_value;
 	int ascii_code = -1;
 	int offset = 0;
@@ -127,18 +123,8 @@ int run_shell() {
 					offset = ESC + tmp_value.integer;
 				}
 			} else {
-				tmp_buffer = push_elem(tmp_buffer, tmp_value);
-				if(tmp_buffer->next == NULL && tmp_buffer->prev == NULL) {
-					if(buffer == NULL) {
-						buffer = tmp_buffer;	// We keep the head.
-					} else {
-						// Add in head
-						buffer->prev = tmp_buffer;
-						tmp_buffer->next = buffer;
-						buffer = tmp_buffer;
-					}
-				}
-				print_buffer(tmp_buffer);
+				push_elem(buffer, tmp_value);
+				print_buffer();
 			}
 		} else {
 			switch(ascii_code) {
@@ -146,22 +132,21 @@ int run_shell() {
 					quit_shell();
 					break;
 				case RIGHT_A_K:
-					move_cusor(&tmp_buffer, CURSOR_DIR_RIGHT);
+					move_cusor(CURSOR_DIR_RIGHT);
 					break;
 				case LEFT_A_K:
-					move_cusor(&tmp_buffer, CURSOR_DIR_LEFT);
+					move_cusor(CURSOR_DIR_LEFT);
 					break;
 				case BEGIN:
-					move_cusor(&tmp_buffer, CURSOR_DIR_BEGIN);
+					move_cusor(CURSOR_DIR_BEGIN);
 					break;
 				case END:
-					move_cusor(&tmp_buffer, CURSOR_DIR_END);
+					move_cusor(CURSOR_DIR_END);
 					break;
 				case ENTER:
 					if(handle_cmd() == RET_ERROR) {
 						print_error("Error while executing command!");
 					}
-					tmp_buffer = NULL;
 					break;
 				default:
 					//printf("%d => %c\n", ascii_code, tmp_value.character);
@@ -184,7 +169,8 @@ int run_shell() {
 int handle_cmd() {
 	printf("\n");
 	printf("CMD: ");
-	print_buffer(buffer);
+	move_begin_list(buffer);
+	print_buffer();
 	printf("\n");
 
 	free_buffer();
