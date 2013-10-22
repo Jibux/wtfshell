@@ -104,13 +104,17 @@ int forward_list(List *list) {
 }
 
 int delete_elem(List *list) {
+	ListElem *next_node;
 	if(list->queue == NULL) {
 		return RET_OK;
 	}
 
 	if(list->current == NULL) {
-		move_end_list(list);
+		//move_end_list(list);
+		return RET_OK;
 	}
+
+	next_node = list->current->prev;
 
 	if(list->current->prev == NULL) {
 		list->head = list->current->next;
@@ -125,7 +129,7 @@ int delete_elem(List *list) {
 	}
 
 	free(list->current);
-	list->current = NULL;
+	list->current = next_node;
 	list->size--;
 	list->position--;
 

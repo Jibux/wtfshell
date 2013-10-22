@@ -40,7 +40,7 @@ void quit_shell() {
 
 	printf("\n");
 	move_begin_list(buffer);
-	print_buffer(0);
+	print_buffer(false);
 	printf("\n");
 
 	free_buffer();
@@ -119,12 +119,43 @@ int move_cusor(const short direction) {
 		case CURSOR_DIR_END:
 			printf("\r");
 			move_begin_list(buffer);
-			print_buffer(0);
+			print_buffer(false);
 			move_end_list(buffer);
 			break;
 		default: break;
 	}
 	
+	return RET_OK;
+}
+
+int delete_from_buffer(bool right) {
+	if(right) {
+		forward_list(buffer);
+	} else {
+		printf("\033[1D");
+	}
+
+	if(buffer->current == NULL) {
+		return RET_OK;
+	} else {
+		printf("\033[K");
+	}
+	
+	delete_elem(buffer);
+
+	if(buffer->current == NULL) {
+		print_buffer(true);
+		printf("\033[1D");
+		return RET_OK;
+	}
+
+	if(buffer->current->next != NULL) {
+		forward_list(buffer);
+		print_buffer(true);
+		backward_list(buffer);
+		printf("\033[1D");
+	}
+
 	return RET_OK;
 }
 
@@ -141,17 +172,23 @@ int run_shell() {
 
 		if(ascii_code >= BEGIN_NORMAL && ascii_code <= END_NORMAL) {
 			if(escape_pressed) {
-				if(tmp_value.integer == OPEN_S_B || tmp_value.integer == O_KEY) {
+				if(tmp_value.integer == OPEN_S_B || tmp_value.integer == O_KEY || tmp_value.integer == STAR_KEY) {
 					offset = ESC + tmp_value.integer;
 				}
 			} else {
 				push_elem(buffer, tmp_value);
-				print_buffer(1);
+				print_buffer(true);
 			}
 		} else {
 			switch(ascii_code) {
 				case EOT:
 					quit_shell();
+					break;
+				case DEL_L:
+					delete_from_buffer(false);
+					break;
+				case DEL_R:
+					delete_from_buffer(true);
 					break;
 				case RIGHT_A_K:
 					move_cusor(CURSOR_DIR_RIGHT);
@@ -192,7 +229,7 @@ int handle_cmd() {
 	printf("\n");
 	printf("CMD: ");
 	move_begin_list(buffer);
-	print_buffer(0);
+	print_buffer(false);
 	printf("\n");
 
 	free_buffer();

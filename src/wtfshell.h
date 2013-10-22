@@ -21,6 +21,7 @@ int free_buffer();
 int print_buffer(bool);
 Value get_char();
 int move_cusor(const short);
+int delete_from_buffer(bool);
 int run_shell();
 int handle_cmd();
 
