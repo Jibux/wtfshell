@@ -29,6 +29,7 @@ void init_list(List *);
 ListElem* new_elem(Value);
 int push_elem(List *, Value);
 int move_begin_list(List *);
+int move_head_list(List *);
 int move_end_list(List *);
 int backward_list(List *);
 int forward_list(List *);

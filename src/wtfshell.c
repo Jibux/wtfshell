@@ -23,6 +23,11 @@ int init_shell() {
 	term.c_lflag &= ~( ICANON | ECHO );
 	tcsetattr( STDIN_FILENO, TCSANOW, &term );
 
+	List buffer_tmp;
+
+	buffer = &buffer_tmp;
+	buffer = (List*) malloc(sizeof(List));
+
 	init_list(buffer);
 
 	return RET_OK;
@@ -34,10 +39,13 @@ void quit_shell() {
 	tcsetattr( STDIN_FILENO, TCSANOW, &term );
 
 	printf("\n");
-	print_buffer(buffer);
+	move_begin_list(buffer);
+	print_buffer(0);
 	printf("\n");
 
 	free_buffer();
+
+	free(buffer);
 
 	printf("exit\n");
 
@@ -50,21 +58,34 @@ int free_buffer() {
 	return RET_OK;
 }
 
-int print_buffer() {
-	if(buffer->current == NULL) {
+int print_buffer(bool backup) {
+	if(buffer->head == NULL) {
 		return RET_OK;
+	}
+	
+	int pos = buffer->position;
+	ListElem *tmp = buffer->current;
+
+	if(buffer->current == NULL) {
+		move_head_list(buffer);
 	}
 
 	// DO IT DIFFERENTLY WITH GENERIC FORWARD AND BACKWARD ANS KEEP TRACKING OF CURSOR POS
 	printf("\033[s");
 
-	do {
-		printf("%c", buffer->current->value.character);
+	printf("%c", buffer->current->value.character);
+	while(buffer->current->next != NULL) {
 		forward_list(buffer);
-	} while(buffer->current->next != NULL);
+		printf("%c", buffer->current->value.character);
+	}
 
-	printf("\033[u");
-	printf("\033[1C");
+	if(backup) {
+		buffer->current = tmp;
+		buffer->position = pos;
+
+		printf("\033[u");
+		printf("\033[1C");
+	}
 
 	return RET_OK;
 }
@@ -86,7 +107,7 @@ int move_cusor(const short direction) {
 			}
 			break;
 		case CURSOR_DIR_RIGHT:
-			if(buffer->current != NULL) {
+			if(buffer->size != buffer->position) {
 				printf("\033[1C");
 				forward_list(buffer);
 			}
@@ -98,7 +119,8 @@ int move_cusor(const short direction) {
 		case CURSOR_DIR_END:
 			printf("\r");
 			move_begin_list(buffer);
-			print_buffer();
+			print_buffer(0);
+			move_end_list(buffer);
 			break;
 		default: break;
 	}
@@ -124,7 +146,7 @@ int run_shell() {
 				}
 			} else {
 				push_elem(buffer, tmp_value);
-				print_buffer();
+				print_buffer(1);
 			}
 		} else {
 			switch(ascii_code) {
@@ -170,7 +192,7 @@ int handle_cmd() {
 	printf("\n");
 	printf("CMD: ");
 	move_begin_list(buffer);
-	print_buffer();
+	print_buffer(0);
 	printf("\n");
 
 	free_buffer();

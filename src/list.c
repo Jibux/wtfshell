@@ -9,7 +9,6 @@ void init_list(List *list) {
 }
 
 ListElem* new_elem(Value value) {
-
 	ListElem *new_node = (ListElem*)malloc(sizeof(ListElem));
 	new_node->value.integer = value.integer;
 	new_node->value.character = value.character;
@@ -48,9 +47,10 @@ int push_elem(List *list, Value value) {
 		// New queue
 		list->queue = new_node;
 	}
-
+	
 	new_node->prev = node;
 	node->next = new_node;
+	list->current = new_node;
 	
 	list->size++;
 	list->position++;
@@ -59,23 +59,30 @@ int push_elem(List *list, Value value) {
 }
 
 int move_begin_list(List *list) {
+	list->current = NULL;
+	list->position = 0;
+	return RET_OK;
+}
+
+int move_head_list(List *list) {
 	list->current = list->head;
+	list->position = 1;
 	return RET_OK;
 }
 
 int move_end_list(List *list) {
 	list->current = list->queue;
+	list->position = list->size;
 	return RET_OK;
 }
 
 int backward_list(List *list) {
 	if(list->current == NULL) {
-		list->current = list->head;
+		//move_begin_list(list);
 		return RET_OK;
-	}
-
-	if(list->current->prev != NULL) {
+	} else {
 		list->current = list->current->prev;
+		list->position--;
 	}
 	
 	return RET_OK;
@@ -83,20 +90,26 @@ int backward_list(List *list) {
 
 int forward_list(List *list) {
 	if(list->current == NULL) {
-		list->current = list->head;
+		move_head_list(list);
 		return RET_OK;
 	}
 
 	if(list->current->next != NULL) {
 		list->current = list->current->next;
 	}
-	
+
+	list->position++;
+
 	return RET_OK;
 }
 
 int delete_elem(List *list) {
+	if(list->queue == NULL) {
+		return RET_OK;
+	}
+
 	if(list->current == NULL) {
-		list->current = list->queue;
+		move_end_list(list);
 	}
 
 	if(list->current->prev == NULL) {
@@ -113,6 +126,8 @@ int delete_elem(List *list) {
 
 	free(list->current);
 	list->current = NULL;
+	list->size--;
+	list->position--;
 
 	return RET_OK;
 }
