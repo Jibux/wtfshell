@@ -6,6 +6,46 @@ void sig_handler(int signal) {
 	}
 }
 
+int copy_in_2d_array(int array1[EXPECTATIONS_SIZE][EXPECTATIONS_MAX_LENGTH], int *array2, int index) {
+	int j;
+
+	for(j = 0; array2[j] > 0; j++) {
+		array1[index][j] = array2[j];
+	}
+
+	return RET_OK;
+}
+
+int init_expectations() {
+	int ascii0[] = {ESC,	OPEN_S_B,	D_KEY,	LEFT_A_K,	NO_CMD};
+	int ascii1[] = {ESC,	OPEN_S_B,	C_KEY,	RIGHT_A_K,	NO_CMD};
+	int ascii2[] = {ESC,	OPEN_S_B,	NUM_3,	TILDE,		DEL_R};
+	int ascii3[] = {ESC,	O_KEY,		H_KEY,	BEGIN,		NO_CMD};
+	int ascii4[] = {ESC,	O_KEY,		F_KEY,	END,		NO_CMD};
+	int ascii5[] = {DEL,	DEL_L,		NO_CMD,	NO_CMD,		NO_CMD};
+	int ascii6[] = {ENTER,	ENTER_CMD,	NO_CMD,	NO_CMD,		NO_CMD};
+	int ascii7[] = {NO_CMD,	NO_CMD,		NO_CMD,	NO_CMD,		NO_CMD};
+
+	int i, j;
+
+	for(i = 0; i < EXPECTATIONS_SIZE; i++) {
+		for(j = 0; j < EXPECTATIONS_MAX_LENGTH; j++) {
+			EXPECTATIONS[i][j] = NO_CMD;
+		}
+	}
+
+	copy_in_2d_array(EXPECTATIONS, ascii0, 0);
+	copy_in_2d_array(EXPECTATIONS, ascii1, 1);
+	copy_in_2d_array(EXPECTATIONS, ascii2, 2);
+	copy_in_2d_array(EXPECTATIONS, ascii3, 3);
+	copy_in_2d_array(EXPECTATIONS, ascii4, 4);
+	copy_in_2d_array(EXPECTATIONS, ascii5, 5);
+	copy_in_2d_array(EXPECTATIONS, ascii6, 6);
+	copy_in_2d_array(EXPECTATIONS, ascii7, 7);
+
+	return RET_OK;
+}
+
 int init_shell() {
 	if (signal(SIGINT, sig_handler) == SIG_ERR) {
 		fprintf(stderr, "\nCan't catch SIGINT\n");
@@ -30,6 +70,8 @@ int init_shell() {
 
 	init_list(buffer);
 
+	init_expectations();
+
 	return RET_OK;
 }
 
@@ -45,8 +87,6 @@ void quit_shell() {
 
 	free_buffer();
 
-	free(buffer);
-
 	printf("exit\n");
 
 	exit(0);
@@ -54,6 +94,7 @@ void quit_shell() {
 
 int free_buffer() {
 	free_list(buffer);
+	free(buffer);
 
 	return RET_OK;
 }
@@ -159,23 +200,31 @@ int delete_from_buffer(bool right) {
 	return RET_OK;
 }
 
-int run_shell() {
+/*int run_shell() {
 	Value tmp_value;
 	int ascii_code = -1;
 	int offset = 0;
 	bool escape_pressed = false;
+	bool continue_esc = false;
 
 	for (;;) {
 		tmp_value = get_char();
 		ascii_code = tmp_value.integer + offset;
-		offset = 0;
+		continue_esc = false;
+		if(!escape_pressed) {
+			offset = 0;
+		} else {
+			offset = offset + tmp_value.integer;
+		}
 
+		// TODO WORK WITH TREE EXPECTATION... ESC then OPEN_S_B then etc.
+		
 		if(ascii_code >= BEGIN_NORMAL && ascii_code <= END_NORMAL) {
-			if(escape_pressed) {
-				if(tmp_value.integer == OPEN_S_B || tmp_value.integer == O_KEY || tmp_value.integer == STAR_KEY) {
-					offset = ESC + tmp_value.integer;
-				}
-			} else {
+				//if(tmp_value.integer == OPEN_S_B || tmp_value.integer == O_KEY) {
+			//		offset = offset + tmp_value.integer;
+				//}
+			//} else {
+			if(!escape_pressed) {
 				push_elem(buffer, tmp_value);
 				print_buffer(true);
 			}
@@ -187,9 +236,9 @@ int run_shell() {
 				case DEL_L:
 					delete_from_buffer(false);
 					break;
-				case DEL_R:
-					delete_from_buffer(true);
-					break;
+			//	case DEL_R:
+			//		delete_from_buffer(true);
+			//		break;
 				case RIGHT_A_K:
 					move_cusor(CURSOR_DIR_RIGHT);
 					break;
@@ -208,6 +257,7 @@ int run_shell() {
 					}
 					break;
 				default:
+					continue_esc = true;
 					//printf("%d => %c\n", ascii_code, tmp_value.character);
 					break;
 			} 
@@ -215,11 +265,101 @@ int run_shell() {
 		
 		if(ascii_code == ESC) {
 			escape_pressed = true;
-		} else {
+			offset = ESC;
+		} else if(!continue_esc) {
 			escape_pressed = false;
 		}
 
 		ascii_code = -1;
+	}
+
+	return RET_OK;
+}*/
+
+int analyse_expectations(int ascii_code) {
+	static int max_i = 0;
+	static int max_j = 0;
+	int i, j;
+
+	j = max_j;
+
+	for(i = max_i; i < EXPECTATIONS_SIZE; i++) {
+		if(EXPECTATIONS[i][j] == ascii_code) {
+			if(j > 0 && i > 0) {
+				if(EXPECTATIONS[i-1][j-1] == EXPECTATIONS[i][j-1]) {
+					max_j++;
+					max_i = i;
+				}
+			} else {
+				max_j++;
+				max_i = i;
+			}
+
+			if(j+1 >= EXPECTATIONS_MAX_LENGTH) {
+				max_i = 0;
+				max_j = 0;
+			} else if(EXPECTATIONS[i][j+1] < 0) {
+				max_i = 0;
+				max_j = 0;
+				return EXPECTATIONS[i][j+1];
+			}
+
+			return WAIT_CMD;
+		}
+	}
+	
+	return NO_CMD;
+}
+
+int run_shell() {
+	Value tmp_value;
+	int ascii_code = -1;
+	int cmd_code = -1;
+
+	for (;;) {
+		tmp_value = get_char();
+		ascii_code = tmp_value.integer;
+
+		// EXPECTATIONS
+		cmd_code = analyse_expectations(ascii_code);
+
+		printf("%d %d\n", cmd_code, ascii_code);
+
+		switch(cmd_code) {
+			case EOT:
+				quit_shell();
+				break;
+			case DEL_L:
+				delete_from_buffer(false);
+				break;
+			case DEL_R:
+				delete_from_buffer(true);
+				break;
+			case RIGHT_A_K:
+				move_cusor(CURSOR_DIR_RIGHT);
+				break;
+			case LEFT_A_K:
+				move_cusor(CURSOR_DIR_LEFT);
+				break;
+			case BEGIN:
+				move_cusor(CURSOR_DIR_BEGIN);
+				break;
+			case END:
+				move_cusor(CURSOR_DIR_END);
+				break;
+			case ENTER_CMD:
+				if(handle_cmd() == RET_ERROR) {
+					print_error("Error while executing command!");
+				}
+				break;
+			case NO_CMD:
+				push_elem(buffer, tmp_value);
+				print_buffer(true);
+				break;
+			default:
+				//printf("%d => %c\n", ascii_code, tmp_value.character);
+				break;
+		}
 	}
 
 	return RET_OK;
