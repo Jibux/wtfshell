@@ -9,7 +9,7 @@ void sig_handler(int signal) {
 int copy_in_2d_array(int array1[EXPECTATIONS_SIZE][EXPECTATIONS_MAX_LENGTH], int *array2, int index) {
 	int j;
 
-	for(j = 0; array2[j] > 0; j++) {
+	for(j = 0; j < EXPECTATIONS_MAX_LENGTH; j++) {
 		array1[index][j] = array2[j];
 	}
 
@@ -24,7 +24,8 @@ int init_expectations() {
 	int ascii4[] = {ESC,	O_KEY,		F_KEY,	END,		NO_CMD};
 	int ascii5[] = {DEL,	DEL_L,		NO_CMD,	NO_CMD,		NO_CMD};
 	int ascii6[] = {ENTER,	ENTER_CMD,	NO_CMD,	NO_CMD,		NO_CMD};
-	int ascii7[] = {NO_CMD,	NO_CMD,		NO_CMD,	NO_CMD,		NO_CMD};
+	int ascii7[] = {EOT,	EOT_CMD,	NO_CMD,	NO_CMD,		NO_CMD};
+	int ascii8[] = {NO_CMD,	NO_CMD,		NO_CMD,	NO_CMD,		NO_CMD};
 
 	int i, j;
 
@@ -42,6 +43,7 @@ int init_expectations() {
 	copy_in_2d_array(EXPECTATIONS, ascii5, 5);
 	copy_in_2d_array(EXPECTATIONS, ascii6, 6);
 	copy_in_2d_array(EXPECTATIONS, ascii7, 7);
+	copy_in_2d_array(EXPECTATIONS, ascii8, 8);
 
 	return RET_OK;
 }
@@ -92,10 +94,14 @@ void quit_shell() {
 	exit(0);
 }
 
-int free_buffer() {
+int free_buffer_content() {
 	free_list(buffer);
-	free(buffer);
+	return RET_OK;
+}
 
+int free_buffer() {
+	free_buffer_content();
+	free(buffer);
 	return RET_OK;
 }
 
@@ -298,6 +304,7 @@ int analyse_expectations(int ascii_code) {
 			if(j+1 >= EXPECTATIONS_MAX_LENGTH) {
 				max_i = 0;
 				max_j = 0;
+				return NO_CMD;
 			} else if(EXPECTATIONS[i][j+1] < 0) {
 				max_i = 0;
 				max_j = 0;
@@ -307,6 +314,9 @@ int analyse_expectations(int ascii_code) {
 			return WAIT_CMD;
 		}
 	}
+
+	max_i = 0;
+	max_j = 0;
 	
 	return NO_CMD;
 }
@@ -323,10 +333,10 @@ int run_shell() {
 		// EXPECTATIONS
 		cmd_code = analyse_expectations(ascii_code);
 
-		printf("%d %d\n", cmd_code, ascii_code);
+		//printf("%d %d\n",ascii_code, cmd_code);
 
 		switch(cmd_code) {
-			case EOT:
+			case EOT_CMD:
 				quit_shell();
 				break;
 			case DEL_L:
@@ -372,7 +382,7 @@ int handle_cmd() {
 	print_buffer(false);
 	printf("\n");
 
-	free_buffer();
+	free_buffer_content();
 
 	execute_cmd();
 

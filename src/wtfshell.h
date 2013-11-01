@@ -9,7 +9,7 @@
 #define CURSOR_DIR_BEGIN 3
 #define CURSOR_DIR_END 4
 
-#define EXPECTATIONS_SIZE 8
+#define EXPECTATIONS_SIZE 9
 #define EXPECTATIONS_MAX_LENGTH 5
 
 int EXPECTATIONS[EXPECTATIONS_SIZE][EXPECTATIONS_MAX_LENGTH];
@@ -25,6 +25,7 @@ int copy_in_2d_array(int [EXPECTATIONS_SIZE][EXPECTATIONS_MAX_LENGTH], int *, in
 int init_expectations();
 int init_shell();
 void quit_shell();
+int free_buffer_content();
 int free_buffer();
 int print_buffer(bool);
 Value get_char();
