@@ -206,82 +206,6 @@ int delete_from_buffer(bool right) {
 	return RET_OK;
 }
 
-/*int run_shell() {
-	Value tmp_value;
-	int ascii_code = -1;
-	int offset = 0;
-	bool escape_pressed = false;
-	bool continue_esc = false;
-
-	for (;;) {
-		tmp_value = get_char();
-		ascii_code = tmp_value.integer + offset;
-		continue_esc = false;
-		if(!escape_pressed) {
-			offset = 0;
-		} else {
-			offset = offset + tmp_value.integer;
-		}
-
-		// TODO WORK WITH TREE EXPECTATION... ESC then OPEN_S_B then etc.
-		
-		if(ascii_code >= BEGIN_NORMAL && ascii_code <= END_NORMAL) {
-				//if(tmp_value.integer == OPEN_S_B || tmp_value.integer == O_KEY) {
-			//		offset = offset + tmp_value.integer;
-				//}
-			//} else {
-			if(!escape_pressed) {
-				push_elem(buffer, tmp_value);
-				print_buffer(true);
-			}
-		} else {
-			switch(ascii_code) {
-				case EOT:
-					quit_shell();
-					break;
-				case DEL_L:
-					delete_from_buffer(false);
-					break;
-			//	case DEL_R:
-			//		delete_from_buffer(true);
-			//		break;
-				case RIGHT_A_K:
-					move_cusor(CURSOR_DIR_RIGHT);
-					break;
-				case LEFT_A_K:
-					move_cusor(CURSOR_DIR_LEFT);
-					break;
-				case BEGIN:
-					move_cusor(CURSOR_DIR_BEGIN);
-					break;
-				case END:
-					move_cusor(CURSOR_DIR_END);
-					break;
-				case ENTER:
-					if(handle_cmd() == RET_ERROR) {
-						print_error("Error while executing command!");
-					}
-					break;
-				default:
-					continue_esc = true;
-					//printf("%d => %c\n", ascii_code, tmp_value.character);
-					break;
-			} 
-		}
-		
-		if(ascii_code == ESC) {
-			escape_pressed = true;
-			offset = ESC;
-		} else if(!continue_esc) {
-			escape_pressed = false;
-		}
-
-		ascii_code = -1;
-	}
-
-	return RET_OK;
-}*/
-
 int analyse_expectations(int ascii_code) {
 	static int max_i = 0;
 	static int max_j = 0;
@@ -325,6 +249,7 @@ int run_shell() {
 	Value tmp_value;
 	int ascii_code = -1;
 	int cmd_code = -1;
+	bool print_the_buffer = true;
 
 	for (;;) {
 		tmp_value = get_char();
@@ -333,7 +258,7 @@ int run_shell() {
 		// EXPECTATIONS
 		cmd_code = analyse_expectations(ascii_code);
 
-		//printf("%d %d\n",ascii_code, cmd_code);
+		printf("%d %d %c\n",ascii_code, cmd_code, tmp_value.character);
 
 		switch(cmd_code) {
 			case EOT_CMD:
@@ -364,7 +289,19 @@ int run_shell() {
 				break;
 			case NO_CMD:
 				push_elem(buffer, tmp_value);
-				print_buffer(true);
+				if(ascii_code > END_NORMAL) {
+					if(print_the_buffer) {
+					   print_the_buffer	= false;
+					} else {
+						print_the_buffer = true;
+						backward_list(buffer);
+					}
+				} else {
+					print_the_buffer = true;
+				}
+				if(print_the_buffer) {
+					print_buffer(true);
+				}
 				break;
 			default:
 				//printf("%d => %c\n", ascii_code, tmp_value.character);
