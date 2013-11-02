@@ -4,7 +4,7 @@ typedef union Value Value;
 
 union Value {
 	int integer;
-	char character;
+	wchar_t character;
 };
 
 typedef struct ListElem ListElem;

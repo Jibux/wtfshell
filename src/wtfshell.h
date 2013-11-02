@@ -29,6 +29,8 @@ int free_buffer_content();
 int free_buffer();
 int print_buffer(bool);
 Value get_char();
+int forward_buffer();
+int backward_buffer();
 int move_cusor(const short);
 int delete_from_buffer(bool);
 int analyse_expectations(int);

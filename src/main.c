@@ -50,6 +50,7 @@ int main(int argc, char* argv[]) {
 		print_error("Cannot run shell!");
 		return RET_ERROR;
 	}
+
 	
 	quit_shell();
 

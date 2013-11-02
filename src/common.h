@@ -9,6 +9,9 @@
 #include <signal.h>
 #include <stdbool.h>
 #include <stdarg.h>
+#include <stddef.h>
+#include <wchar.h>
+#include <locale.h>
 
 
 // DEFINE SOME CONSTANTS

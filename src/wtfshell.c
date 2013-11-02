@@ -74,6 +74,8 @@ int init_shell() {
 
 	init_expectations();
 
+	setlocale(LC_ALL, "en_US.UTF-8");
+
 	return RET_OK;
 }
 
@@ -82,14 +84,14 @@ void quit_shell() {
 	term.c_lflag = backupflag;
 	tcsetattr( STDIN_FILENO, TCSANOW, &term );
 
-	printf("\n");
+	wprintf(L"\n");
 	move_begin_list(buffer);
 	print_buffer(false);
-	printf("\n");
+	wprintf(L"\n");
 
 	free_buffer();
 
-	printf("exit\n");
+	wprintf(L"exit\n");
 
 	exit(0);
 }
@@ -118,20 +120,20 @@ int print_buffer(bool backup) {
 	}
 
 	// DO IT DIFFERENTLY WITH GENERIC FORWARD AND BACKWARD ANS KEEP TRACKING OF CURSOR POS
-	printf("\033[s");
+	wprintf(L"\033[s");
 
-	printf("%c", buffer->current->value.character);
+	wprintf(L"%lc", buffer->current->value.character);
 	while(buffer->current->next != NULL) {
 		forward_list(buffer);
-		printf("%c", buffer->current->value.character);
+		wprintf(L"%lc", buffer->current->value.character);
 	}
 
 	if(backup) {
 		buffer->current = tmp;
 		buffer->position = pos;
 
-		printf("\033[u");
-		printf("\033[1C");
+		wprintf(L"\033[u");
+		wprintf(L"\033[1C");
 	}
 
 	return RET_OK;
@@ -139,32 +141,44 @@ int print_buffer(bool backup) {
 
 Value get_char() {
 	Value value;
-	value.character = getchar();
-	value.integer = value.character & 0xFF;
+	value.character = getwchar();
+	value.integer = value.character & 0xFFFF;
 
 	return value;
+}
+
+int backward_buffer() {
+	backward_list(buffer);
+	
+	return RET_OK;
+}
+
+int forward_buffer() {
+	forward_list(buffer);
+	
+	return RET_OK;
 }
 
 int move_cusor(const short direction) {
 	switch(direction) {
 		case CURSOR_DIR_LEFT:
 			if(buffer->current != NULL) {
-				printf("\033[1D");
-				backward_list(buffer);
+				wprintf(L"\033[1D");
+				backward_buffer();
 			}
 			break;
 		case CURSOR_DIR_RIGHT:
 			if(buffer->size != buffer->position) {
-				printf("\033[1C");
-				forward_list(buffer);
+				wprintf(L"\033[1C");
+				forward_buffer();
 			}
 			break;
 		case CURSOR_DIR_BEGIN:
-			printf("\r");
+			wprintf(L"\r");
 			move_begin_list(buffer);
 			break;
 		case CURSOR_DIR_END:
-			printf("\r");
+			wprintf(L"\r");
 			move_begin_list(buffer);
 			print_buffer(false);
 			move_end_list(buffer);
@@ -179,20 +193,20 @@ int delete_from_buffer(bool right) {
 	if(right) {
 		forward_list(buffer);
 	} else {
-		printf("\033[1D");
+		wprintf(L"\033[1D");
 	}
 
 	if(buffer->current == NULL) {
 		return RET_OK;
 	} else {
-		printf("\033[K");
+		wprintf(L"\033[K");
 	}
 	
 	delete_elem(buffer);
 
 	if(buffer->current == NULL) {
 		print_buffer(true);
-		printf("\033[1D");
+		wprintf(L"\033[1D");
 		return RET_OK;
 	}
 
@@ -200,7 +214,7 @@ int delete_from_buffer(bool right) {
 		forward_list(buffer);
 		print_buffer(true);
 		backward_list(buffer);
-		printf("\033[1D");
+		wprintf(L"\033[1D");
 	}
 
 	return RET_OK;
@@ -249,7 +263,8 @@ int run_shell() {
 	Value tmp_value;
 	int ascii_code = -1;
 	int cmd_code = -1;
-	bool print_the_buffer = true;
+
+	wprintf(L"");
 
 	for (;;) {
 		tmp_value = get_char();
@@ -258,7 +273,7 @@ int run_shell() {
 		// EXPECTATIONS
 		cmd_code = analyse_expectations(ascii_code);
 
-		printf("%d %d %c\n",ascii_code, cmd_code, tmp_value.character);
+		//wprintf(L"%d %d %lc\n",ascii_code, cmd_code, tmp_value.character);
 
 		switch(cmd_code) {
 			case EOT_CMD:
@@ -289,19 +304,7 @@ int run_shell() {
 				break;
 			case NO_CMD:
 				push_elem(buffer, tmp_value);
-				if(ascii_code > END_NORMAL) {
-					if(print_the_buffer) {
-					   print_the_buffer	= false;
-					} else {
-						print_the_buffer = true;
-						backward_list(buffer);
-					}
-				} else {
-					print_the_buffer = true;
-				}
-				if(print_the_buffer) {
-					print_buffer(true);
-				}
+				print_buffer(true);
 				break;
 			default:
 				//printf("%d => %c\n", ascii_code, tmp_value.character);
@@ -313,11 +316,11 @@ int run_shell() {
 }
 
 int handle_cmd() {
-	printf("\n");
-	printf("CMD: ");
+	wprintf(L"\n");
+	wprintf(L"CMD: ");
 	move_begin_list(buffer);
 	print_buffer(false);
-	printf("\n");
+	wprintf(L"\n");
 
 	free_buffer_content();
 
