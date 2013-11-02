@@ -9,6 +9,8 @@ typedef enum {
 	BEGIN_NORMAL = 32,	// BEGINING OF NORMAL ASCII CHARS
 	STAR_KEY = 42,		// *
 	NUM_3 = 51,			// 3
+	A_KEY = 65,			// A
+	B_KEY = 66,			// B
 	C_KEY = 67,			// C
 	D_KEY = 68,			// D
 	F_KEY = 70,			// F
@@ -25,9 +27,11 @@ typedef enum {
 	DEL_R = -101,		// DELETE RIGHT
 	END = -102,			// END KEY
 	BEGIN = -103,		// BEGIN KEY
-	RIGHT_A_K = -104,	// RIGHT ARROW KEY
-	LEFT_A_K = -105,	// LEFT ARROW KEY
-	ENTER_CMD = -2,	// ENTER
+	UP_A_K = -104,		// UP ARROW KEY
+	DOWN_A_K = -105,	// DOWN ARROW KEY
+	RIGHT_A_K = -106,	// RIGHT ARROW KEY
+	LEFT_A_K = -107,	// LEFT ARROW KEY
+	ENTER_CMD = -2,		// ENTER
 	EOT_CMD = -3,		// END OF TRANSMISSION (CTRL + D)
 	NO_CMD = -1,		// NO CMD
 	WAIT_CMD = 0,		// WAIT FOR OTHER CHAR

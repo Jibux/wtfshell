@@ -17,15 +17,17 @@ int copy_in_2d_array(int array1[EXPECTATIONS_SIZE][EXPECTATIONS_MAX_LENGTH], int
 }
 
 int init_expectations() {
-	int ascii0[] = {ESC,	OPEN_S_B,	D_KEY,	LEFT_A_K,	NO_CMD};
-	int ascii1[] = {ESC,	OPEN_S_B,	C_KEY,	RIGHT_A_K,	NO_CMD};
-	int ascii2[] = {ESC,	OPEN_S_B,	NUM_3,	TILDE,		DEL_R};
-	int ascii3[] = {ESC,	O_KEY,		H_KEY,	BEGIN,		NO_CMD};
-	int ascii4[] = {ESC,	O_KEY,		F_KEY,	END,		NO_CMD};
-	int ascii5[] = {DEL,	DEL_L,		NO_CMD,	NO_CMD,		NO_CMD};
-	int ascii6[] = {ENTER,	ENTER_CMD,	NO_CMD,	NO_CMD,		NO_CMD};
-	int ascii7[] = {EOT,	EOT_CMD,	NO_CMD,	NO_CMD,		NO_CMD};
-	int ascii8[] = {NO_CMD,	NO_CMD,		NO_CMD,	NO_CMD,		NO_CMD};
+	int ascii0[] =	{ESC,		OPEN_S_B,	A_KEY,	UP_A_K,		NO_CMD};
+	int ascii1[] =	{ESC,		OPEN_S_B,	B_KEY,	DOWN_A_K,	NO_CMD};
+	int ascii2[] =	{ESC,		OPEN_S_B,	C_KEY,	RIGHT_A_K,	NO_CMD};
+	int ascii3[] =	{ESC,		OPEN_S_B,	D_KEY,	LEFT_A_K,	NO_CMD};
+	int ascii4[] =	{ESC,		OPEN_S_B,	NUM_3,	TILDE,		DEL_R};
+	int ascii5[] =	{ESC,		O_KEY,		H_KEY,	BEGIN,		NO_CMD};
+	int ascii6[] =	{ESC,		O_KEY,		F_KEY,	END,		NO_CMD};
+	int ascii7[] =	{DEL,		DEL_L,		NO_CMD,	NO_CMD,		NO_CMD};
+	int ascii8[] =	{ENTER,		ENTER_CMD,	NO_CMD,	NO_CMD,		NO_CMD};
+	int ascii9[] =	{EOT,		EOT_CMD,	NO_CMD,	NO_CMD,		NO_CMD};
+	int ascii10[] =	{NO_CMD,	NO_CMD,		NO_CMD,	NO_CMD,		NO_CMD};
 
 	int i, j;
 
@@ -44,6 +46,8 @@ int init_expectations() {
 	copy_in_2d_array(EXPECTATIONS, ascii6, 6);
 	copy_in_2d_array(EXPECTATIONS, ascii7, 7);
 	copy_in_2d_array(EXPECTATIONS, ascii8, 8);
+	copy_in_2d_array(EXPECTATIONS, ascii9, 9);
+	copy_in_2d_array(EXPECTATIONS, ascii10, 10);
 
 	return RET_OK;
 }
@@ -191,7 +195,7 @@ int move_cusor(const short direction) {
 
 int delete_from_buffer(bool right) {
 	if(right) {
-		forward_list(buffer);
+		forward_buffer();
 	} else {
 		wprintf(L"\033[1D");
 	}
@@ -211,9 +215,9 @@ int delete_from_buffer(bool right) {
 	}
 
 	if(buffer->current->next != NULL) {
-		forward_list(buffer);
+		forward_buffer();
 		print_buffer(true);
-		backward_list(buffer);
+		backward_buffer();
 		wprintf(L"\033[1D");
 	}
 
@@ -284,6 +288,12 @@ int run_shell() {
 				break;
 			case DEL_R:
 				delete_from_buffer(true);
+				break;
+			case UP_A_K:
+				wprintf(L"UP");
+				break;
+			case DOWN_A_K:
+				wprintf(L"DOWN");
 				break;
 			case RIGHT_A_K:
 				move_cusor(CURSOR_DIR_RIGHT);
