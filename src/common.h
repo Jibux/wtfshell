@@ -12,6 +12,7 @@
 #include <stddef.h>
 #include <wchar.h>
 #include <locale.h>
+//#include <ncurses.h>
 
 
 // DEFINE SOME CONSTANTS

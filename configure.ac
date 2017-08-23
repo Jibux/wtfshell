@@ -7,7 +7,7 @@ AM_INIT_AUTOMAKE([-Wall -Werror foreign])
 AC_CONFIG_SRCDIR([src/wtfshell.h])
 AC_CONFIG_HEADERS([config.h])
 
-CFLAGS=$CFLAGS"-std=c99 -Wall -g -lutil"
+CFLAGS=$CFLAGS"-std=c99 -Wall -g -lutil -lncurses"
 
 # Checks for programs.
 AC_PROG_CC
