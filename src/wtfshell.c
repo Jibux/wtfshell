@@ -123,7 +123,7 @@ int print_buffer(bool backup) {
 		move_head_list(buffer);
 	}
 
-	// DO IT DIFFERENTLY WITH GENERIC FORWARD AND BACKWARD ANS KEEP TRACKING OF CURSOR POS
+	// DO IT DIFFERENTLY WITH GENERIC FORWARD AND BACKWARD AND KEEP TRACKING OF CURSOR POS
 	wprintf(L"\033[s");
 
 	wprintf(L"%lc", buffer->current->value.character);
@@ -145,7 +145,8 @@ int print_buffer(bool backup) {
 
 Value get_char() {
 	Value value;
-	value.character = getwchar();
+	//value.character = getwchar();
+	wscanf(L"%lc",&(value.character));
 	value.integer = value.character & 0xFFFF;
 
 	return value;

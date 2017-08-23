@@ -41,6 +41,9 @@ int main(int argc, char* argv[]) {
 	}
 	printf("Done\n");*/
 
+	//wchar_t *test;
+	//wscanf(L"%ls",test);
+
 	if(init_shell() == RET_ERROR) {
 		print_error("Cannot init!");
 		return RET_ERROR;
