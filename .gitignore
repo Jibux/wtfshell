@@ -19,3 +19,12 @@ src/wtfshell
 stamp-h1
 autom4te.cache
 configure.scan
+Makefile.in
+aclocal.m4
+compile
+configure
+depcomp
+install-sh
+missing
+src/Makefile.in
+
