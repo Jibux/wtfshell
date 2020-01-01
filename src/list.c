@@ -104,7 +104,7 @@ int forward_list(List *list) {
 }
 
 int delete_elem(List *list) {
-	ListElem *next_node;
+	ListElem *next_current_node, *node_to_delete;
 	if(list->queue == NULL) {
 		return RET_OK;
 	}
@@ -114,22 +114,23 @@ int delete_elem(List *list) {
 		return RET_OK;
 	}
 
-	next_node = list->current->prev;
+	node_to_delete = list->current;
+	next_current_node = node_to_delete->prev;
 
-	if(list->current->prev == NULL) {
-		list->head = list->current->next;
+	if(next_current_node == NULL) {
+		list->head = node_to_delete->next;
 	} else {
-		list->current->prev->next = list->current->next;
+		next_current_node->next = node_to_delete->next;
 	}
 
-	if(list->current->next == NULL) {
-		list->queue = list->current->prev;
+	if(node_to_delete->next == NULL) {
+		list->queue = next_current_node;
 	} else {
-		list->current->next->prev = list->current->prev;
+		node_to_delete->next->prev = next_current_node;
 	}
 
-	free(list->current);
-	list->current = next_node;
+	list->current = next_current_node;
+	free(node_to_delete);
 	list->size--;
 	list->position--;
 
