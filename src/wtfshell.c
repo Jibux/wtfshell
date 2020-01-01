@@ -196,6 +196,8 @@ int move_cusor(const short direction) {
 
 int delete_from_buffer(bool right) {
 	if(right) {
+		if(buffer->current == buffer->queue)
+			return RET_OK;
 		forward_buffer();
 	} else {
 		wprintf(L"\033[1D");
@@ -278,7 +280,7 @@ int run_shell() {
 		// EXPECTATIONS
 		cmd_code = analyse_expectations(ascii_code);
 
-		//wprintf(L"%d %d %lc\n",ascii_code, cmd_code, tmp_value.character);
+		//wprintf(L"1:%d 2:%d 3:%lc\n",ascii_code, cmd_code, tmp_value.character);
 
 		switch(cmd_code) {
 			case EOT_CMD:

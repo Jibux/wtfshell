@@ -96,9 +96,8 @@ int forward_list(List *list) {
 
 	if(list->current->next != NULL) {
 		list->current = list->current->next;
+		list->position++;
 	}
-
-	list->position++;
 
 	return RET_OK;
 }
