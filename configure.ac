@@ -4,7 +4,7 @@
 AC_PREREQ([2.69])
 AC_INIT([FULL-PACKAGE-NAME], [VERSION], [BUG-REPORT-ADDRESS])
 AM_INIT_AUTOMAKE([-Wall -Werror foreign])
-AC_CONFIG_SRCDIR([src/wtfshell.h])
+AC_CONFIG_SRCDIR([src/])
 AC_CONFIG_HEADERS([config.h])
 
 CFLAGS=$CFLAGS"-std=c99 -Wall -g -lutil -lncurses"
